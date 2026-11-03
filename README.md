@@ -11,8 +11,8 @@ que consome a API REST do backend Spring Boot.
 
 ## Banco de dados
 
-Os scripts SQL (estrutura das tabelas e dados de exemplo) estão no repositório do
-backend: https://github.com/cauenl/demo/tree/main/database
+Os scripts SQL (estrutura das tabelas e dados de exemplo) estão na pasta [`database/`](database/).
+O backend (API Spring Boot) está em https://github.com/cauenl/demo, que mantém a mesma pasta.
 
 ## Como rodar
 
