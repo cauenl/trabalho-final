@@ -1,0 +1,17 @@
+# Copie este arquivo para "application-local.properties" (na mesma pasta) e preencha.
+# O application-local.properties NAO vai para o Git (esta no .gitignore).
+
+# Administrador criado automaticamente na primeira execucao (login: e-mail + senha)
+app.admin.email=admin@demo.com
+app.admin.senha=DEFINA-UMA-SENHA
+
+# Chave que assina os tokens JWT (minimo 32 caracteres). Se ficar em branco, o app
+# gera uma chave aleatoria e os tokens deixam de valer a cada reinicio.
+app.jwt.secret=DEFINA-UM-TEXTO-ALEATORIO-COM-NO-MINIMO-32-CARACTERES
+
+# Opcional: envio de e-mail ("saber mais"). Conta SMTP do Mailgun.
+#spring.mail.username=
+#spring.mail.password=
+
+# Opcional: pasta onde as fotos sao gravadas (padrao: ./uploads)
+#app.upload-dir=C:/caminho/para/uploads

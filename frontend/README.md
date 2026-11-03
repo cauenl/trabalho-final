@@ -6,13 +6,12 @@ que consome a API REST do backend Spring Boot.
 ## Pré-requisitos
 
 - Node.js 20 ou superior
-- Backend rodando em `http://localhost:8080` (repositório: https://github.com/cauenl/demo)
+- Backend rodando em `http://localhost:8080` (pasta [`../backend`](../backend))
 - MySQL ligado
 
 ## Banco de dados
 
-Os scripts SQL (estrutura das tabelas e dados de exemplo) estão na pasta [`database/`](database/).
-O backend (API Spring Boot) está em https://github.com/cauenl/demo, que mantém a mesma pasta.
+Os scripts SQL (estrutura das tabelas e dados de exemplo) estão em [`../backend/database/`](../backend/database/).
 
 ## Como rodar
 
