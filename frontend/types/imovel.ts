@@ -34,3 +34,35 @@ export interface Imovel {
   tipoImovel: TipoImovel | null;
   bairro: Bairro | null;
 }
+
+export interface ImovelResumo {
+  id: number;
+  titulo: string;
+  tipo: string | null;
+  bairro: string | null;
+  cidade: string | null;
+  estado: string | null;
+  precoVenda: number | null;
+  precoAluguel: number | null;
+  status: string | null;
+  dormitorios: number | null;
+  banheiros: number | null;
+  garagem: number | null;
+  areaTotal: number | null;
+  fotoCapaId: number | null;
+}
+
+export interface Pagina<T> {
+  conteudo: T[];
+  pagina: number;
+  tamanho: number;
+  totalElementos: number;
+  totalPaginas: number;
+}
+
+export interface Foto {
+  id: number;
+  nomeArquivo: string | null;
+  capa: boolean | null;
+  ordem: number | null;
+}
