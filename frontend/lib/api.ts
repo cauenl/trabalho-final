@@ -1,4 +1,6 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080";
+import { encerrarSessao, obterSessao } from "@/lib/auth";
+
+export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080";
 
 export class ApiError extends Error {
   status: number;
@@ -40,18 +42,20 @@ function mensagemPorStatus(status: number, corpo: string): string {
 
 type Opcoes = Omit<RequestInit, "body"> & {
   body?: unknown;
+  // undefined = usa o token da sessão; null = não envia token (ex.: login)
   token?: string | null;
 };
 
 export async function apiFetch<T>(caminho: string, opcoes: Opcoes = {}): Promise<T> {
   const { body, token, headers, ...resto } = opcoes;
+  const tokenEnviado = token === undefined ? obterSessao()?.token : token;
 
   const cabecalhos = new Headers(headers);
   if (body !== undefined && !(body instanceof FormData)) {
     cabecalhos.set("Content-Type", "application/json");
   }
-  if (token) {
-    cabecalhos.set("Authorization", `Bearer ${token}`);
+  if (tokenEnviado) {
+    cabecalhos.set("Authorization", `Bearer ${tokenEnviado}`);
   }
 
   let resposta: Response;
@@ -71,6 +75,15 @@ export async function apiFetch<T>(caminho: string, opcoes: Opcoes = {}): Promise
   }
 
   if (!resposta.ok) {
+    // token enviado e recusado = sessão expirada: apaga o token e as telas voltam ao login
+    if (resposta.status === 401 && tokenEnviado) {
+      encerrarSessao("Sua sessão expirou. Faça login novamente.");
+      // se o token era o da sessão, refaz sem ele: rotas públicas (vitrine) continuam
+      // funcionando e as protegidas devolvem 401 de novo, que o guard leva ao login
+      if (token === undefined) {
+        return apiFetch<T>(caminho, { ...opcoes, token: null });
+      }
+    }
     const corpo = await resposta.text().catch(() => "");
     throw new ApiError(resposta.status, mensagemPorStatus(resposta.status, textoSimples(corpo)));
   }
