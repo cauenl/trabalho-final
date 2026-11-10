@@ -76,10 +76,42 @@ Abra **http://localhost:3000**. O backend precisa estar no ar.
 Erros: **401** (sem token, token inválido ou expirado) e **403** (token válido, sem permissão).
 O token é enviado em `Authorization: Bearer <token>`.
 
+O login devolve `{ "token": "...", "tipo": "ADMIN" | "USER", "expiraEmSegundos": 7200 }`, e o JWT
+traz as claims `sub` (e-mail), `tipo` e `exp`.
+
+### Vitrine pública
+
+`GET /imoveis/vitrine` (sem token) devolve só imóveis disponíveis, paginados:
+
+| Parâmetro | Descrição |
+|---|---|
+| `bairroId` | filtra por bairro |
+| `finalidade` | `VENDA` ou `ALUGUEL` (define qual preço é usado no filtro e na ordenação) |
+| `precoMin`, `precoMax` | faixa de preço |
+| `ordem` | `recentes` (padrão), `preco_asc` ou `preco_desc` |
+| `pagina`, `tamanho` | paginação (`pagina` começa em 0; `tamanho` padrão 9, máximo 50) |
+
+`GET /fotos/{id}/arquivo` serve a imagem de uma foto.
+
+## Telas do front-end
+
+| Rota | Quem acessa |
+|---|---|
+| `/` vitrine com filtros, ordenação e paginação | Todos |
+| `/imoveis/{id}` detalhe, galeria e botão "Entrar em contato" | Todos |
+| `/login` | Todos |
+| `/cliente` | USER |
+| `/admin` | ADMIN |
+
+Sem sessão, as telas protegidas levam ao login; perfil errado volta para a área do próprio perfil;
+um 401 apaga o token e desloga. O menu muda conforme o perfil e o botão "Sair" apaga o token.
+
 ## Andamento
 
 - [x] **Aula 1: setup e testes do backend.** Backend no ar com CORS, regras de segurança testadas,
   projeto front-end criado e primeira chamada à API (listar imóveis) funcionando.
+- [x] **Aula 2: vitrine e área do cliente.** Vitrine, detalhe, contato, paginação, filtros e ordenação;
+  login com validação, JWT nas requisições, rotas protegidas por perfil, logout e menu por perfil.
 - [ ] Tabelas `ofertas`, `contratos` e `favoritos` no backend
-- [ ] Área pública: vitrine, detalhe, paginação, filtros, ordenação e login
-- [ ] Área do cliente e área do administrador
+- [ ] Ofertas, favoritos e contratos do cliente
+- [ ] CRUDs, gestão e painel do administrador
