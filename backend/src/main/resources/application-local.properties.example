@@ -9,9 +9,13 @@ app.admin.senha=DEFINA-UMA-SENHA
 # gera uma chave aleatoria e os tokens deixam de valer a cada reinicio.
 app.jwt.secret=DEFINA-UM-TEXTO-ALEATORIO-COM-NO-MINIMO-32-CARACTERES
 
-# Opcional: envio de e-mail ("saber mais"). Conta SMTP do Mailgun.
+# Opcional: envio de e-mail ("saber mais" e "entrar em contato"). Conta SMTP do Mailgun.
 #spring.mail.username=
 #spring.mail.password=
+
+# E-mail que recebe os contatos dos visitantes (no sandbox do Mailgun precisa estar em
+# "Authorized Recipients" e ter sido confirmado pelo link que o Mailgun envia).
+#app.imobiliaria.email=
 
 # Opcional: pasta onde as fotos sao gravadas (padrao: ./uploads)
 #app.upload-dir=C:/caminho/para/uploads

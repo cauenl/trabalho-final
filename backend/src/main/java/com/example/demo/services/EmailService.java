@@ -30,6 +30,13 @@ public class EmailService {
     public void enviarEmailComTemplate(String para, String assunto,
                                   String template, Map<String, Object> variaveis)
             throws MessagingException {
+        enviarEmailComTemplate(para, null, assunto, template, variaveis);
+    }
+
+    // responderPara (opcional): quem recebe a resposta ao clicar em "Responder"
+    public void enviarEmailComTemplate(String para, String responderPara, String assunto,
+                                  String template, Map<String, Object> variaveis)
+            throws MessagingException {
 
         Context context = new Context();
         context.setVariables(variaveis);
@@ -40,6 +47,9 @@ public class EmailService {
         MimeMessageHelper helper = new MimeMessageHelper(mime, true, "UTF-8");
         helper.setFrom(remetente);
         helper.setTo(para);
+        if (responderPara != null && !responderPara.isBlank()) {
+            helper.setReplyTo(responderPara);
+        }
         helper.setSubject(assunto);
         helper.setText(html, true);
 

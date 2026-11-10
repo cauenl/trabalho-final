@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body style="font-family: Arial, sans-serif; background:#f4f4f4; padding:20px; color:#2c3e50;">
+    <div style="max-width:600px; margin:auto; background:#ffffff; padding:24px; border-radius:6px;">
+
+        <h2 style="margin-top:0;">
+            Novo interesse no imóvel <span th:text="${codigo}">0</span>
+        </h2>
+
+        <p>
+            <b th:text="${nomeInteressado}">Visitante</b> demonstrou interesse neste imóvel pela vitrine do site.
+            Para responder, use o botão "Responder" do seu e-mail (a resposta vai direto para o interessado).
+        </p>
+
+        <h3 style="margin-bottom:6px;">Imóvel</h3>
+        <table style="width:100%; border-collapse:collapse;">
+            <tr>
+                <td style="padding:4px 0; font-weight:bold; width:140px;">Código</td>
+                <td th:text="${codigo}">0</td>
+            </tr>
+            <tr>
+                <td style="padding:4px 0; font-weight:bold;">Tipo</td>
+                <td th:text="${tipo}">Tipo</td>
+            </tr>
+            <tr>
+                <td style="padding:4px 0; font-weight:bold;">Bairro</td>
+                <td th:text="${bairro}">Bairro</td>
+            </tr>
+            <tr th:if="${valorVenda != null}">
+                <td style="padding:4px 0; font-weight:bold;">Valor de venda</td>
+                <td th:text="'R$ ' + ${#numbers.formatDecimal(valorVenda, 1, 'POINT', 2, 'COMMA')}">R$ 0,00</td>
+            </tr>
+            <tr th:if="${valorAluguel != null}">
+                <td style="padding:4px 0; font-weight:bold;">Valor de aluguel</td>
+                <td th:text="'R$ ' + ${#numbers.formatDecimal(valorAluguel, 1, 'POINT', 2, 'COMMA')}">R$ 0,00</td>
+            </tr>
+            <tr th:if="${titulo != null}">
+                <td style="padding:4px 0; font-weight:bold;">Título</td>
+                <td th:text="${titulo}">Título</td>
+            </tr>
+            <tr th:if="${endereco != null and endereco != ''}">
+                <td style="padding:4px 0; font-weight:bold;">Endereço</td>
+                <td th:text="${endereco}">Endereço</td>
+            </tr>
+        </table>
+
+        <h3 style="margin-bottom:6px;">Interessado</h3>
+        <table style="width:100%; border-collapse:collapse;">
+            <tr>
+                <td style="padding:4px 0; font-weight:bold; width:140px;">Nome</td>
+                <td th:text="${nomeInteressado}">Nome</td>
+            </tr>
+            <tr>
+                <td style="padding:4px 0; font-weight:bold;">E-mail</td>
+                <td th:text="${emailInteressado}">email@exemplo.com</td>
+            </tr>
+            <tr th:if="${telefoneInteressado != null and telefoneInteressado != ''}">
+                <td style="padding:4px 0; font-weight:bold;">Telefone</td>
+                <td th:text="${telefoneInteressado}">telefone</td>
+            </tr>
+        </table>
+
+        <h3 style="margin-bottom:6px;">Mensagem</h3>
+        <p style="background:#f4f6f8; padding:10px; border-radius:4px; white-space:pre-line;" th:text="${mensagem}">Mensagem</p>
+
+        <p style="font-size:12px; color:#888888; margin-bottom:0;">
+            Enviado automaticamente por <span th:text="${nomeImobiliaria}">Imobiliária</span>.
+        </p>
+    </div>
+</body>
+</html>

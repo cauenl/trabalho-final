@@ -33,7 +33,7 @@ public class SecurityConfig {
                 // publico: login, formulario "saber mais" e consulta de imoveis
                 .requestMatchers(HttpMethod.POST,
                     "/public/login", "/public/register", "/auth/login").permitAll()
-                .requestMatchers(HttpMethod.POST, "/imoveis/sabermais/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/imoveis/sabermais/**", "/imoveis/*/contato").permitAll()
                 .requestMatchers(HttpMethod.GET,
                     "/imoveis/**", "/bairros/**", "/tipos-imoveis/**", "/fotos/**").permitAll()
                 .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()

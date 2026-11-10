@@ -15,7 +15,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import com.example.demo.dtos.SaberMaisDTO;  
+import com.example.demo.dtos.ContatoDTO;
+import com.example.demo.dtos.SaberMaisDTO;
 import com.example.demo.dtos.StatusDTO;
 import com.example.demo.models.ImovelModel;
 import com.example.demo.services.EmailService;
@@ -48,15 +49,18 @@ public class ImovelController {
     private final EmailService emailService;
     private final String nomeImobiliaria;
     private final String mensagemImobiliaria;
+    private final String emailImobiliaria;
 
     public ImovelController(ImovelService service,
                             EmailService emailService,
                             @Value("${app.imobiliaria.nome}") String nomeImobiliaria,
-                            @Value("${app.imobiliaria.mensagem}") String mensagemImobiliaria) {
+                            @Value("${app.imobiliaria.mensagem}") String mensagemImobiliaria,
+                            @Value("${app.imobiliaria.email:}") String emailImobiliaria) {
         this.service = service;
         this.emailService = emailService;
         this.nomeImobiliaria = nomeImobiliaria;
         this.mensagemImobiliaria = mensagemImobiliaria;
+        this.emailImobiliaria = emailImobiliaria;
     }
 
      @GetMapping()
@@ -129,6 +133,70 @@ public class ImovelController {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(imovel);
+    }
+
+    // "Entrar em contato": envia (pelo Mailgun) um e-mail PARA a imobiliária dizendo que o visitante
+    // tem interesse no imóvel, com código, tipo, bairro e valor. Responder vai para o visitante.
+    @PostMapping("/{id}/contato")
+    public ResponseEntity<String> contato(@PathVariable Integer id, @RequestBody ContatoDTO dto) {
+        ImovelModel imovel = service.find(id);
+        if (imovel == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Imóvel não encontrado.");
+        }
+
+        if (vazio(dto.getNome()) || dto.getNome().trim().length() > 120) {
+            return ResponseEntity.badRequest().body("Informe o seu nome (até 120 caracteres).");
+        }
+        if (vazio(dto.getEmail()) || !EMAIL.matcher(dto.getEmail().trim()).matches()) {
+            return ResponseEntity.badRequest().body("Informe um e-mail válido.");
+        }
+        if (dto.getTelefone() != null && dto.getTelefone().trim().length() > 40) {
+            return ResponseEntity.badRequest().body("Telefone muito longo.");
+        }
+        if (dto.getMensagem() != null && dto.getMensagem().trim().length() > 2000) {
+            return ResponseEntity.badRequest().body("A mensagem pode ter até 2000 caracteres.");
+        }
+
+        if (vazio(emailImobiliaria)) {
+            log.error("app.imobiliaria.email não configurado: contato do imóvel {} não enviado", id);
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body("O envio de contato não está disponível no momento. Tente novamente mais tarde.");
+        }
+
+        String tipo = imovel.getTipoImovel() == null || vazio(imovel.getTipoImovel().getNome())
+            ? "Imóvel" : imovel.getTipoImovel().getNome();
+        String bairro = imovel.getBairro() == null || vazio(imovel.getBairro().getNome())
+            ? "-" : imovel.getBairro().getNome();
+
+        Map<String, Object> variaveis = new HashMap<>();
+        variaveis.put("codigo", imovel.getId());
+        variaveis.put("tipo", tipo);
+        variaveis.put("bairro", bairro);
+        variaveis.put("valorVenda", imovel.getPrecoVenda());
+        variaveis.put("valorAluguel", imovel.getPrecoAluguel());
+        variaveis.put("titulo", imovel.getTitulo());
+        variaveis.put("endereco", enderecoCompleto(imovel));
+        variaveis.put("nomeInteressado", dto.getNome().trim());
+        variaveis.put("emailInteressado", dto.getEmail().trim());
+        variaveis.put("telefoneInteressado", dto.getTelefone() == null ? "" : dto.getTelefone().trim());
+        variaveis.put("mensagem", vazio(dto.getMensagem())
+            ? "Tenho interesse neste imóvel e gostaria de mais informações."
+            : dto.getMensagem().trim());
+        variaveis.put("nomeImobiliaria", nomeImobiliaria);
+
+        try {
+            emailService.enviarEmailComTemplate(
+                emailImobiliaria,
+                dto.getEmail().trim(),
+                "Interesse no imóvel " + imovel.getId() + " - " + tipo + " em " + bairro,
+                "email/contato",
+                variaveis);
+            return ResponseEntity.ok("Mensagem enviada para a imobiliária.");
+        } catch (Exception e) {
+            log.error("Falha ao enviar o contato do imóvel {} (visitante {})", id, dto.getEmail(), e);
+            return ResponseEntity.internalServerError()
+                .body("Não foi possível enviar a mensagem agora. Tente novamente em instantes.");
+        }
     }
 
     // o cliente preenche o formulario "saber mais" e recebe por e-mail os dados do imovel
