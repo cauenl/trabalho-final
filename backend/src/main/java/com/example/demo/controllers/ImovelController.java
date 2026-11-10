@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import com.example.demo.dtos.SaberMaisDTO;
+import com.example.demo.dtos.SaberMaisDTO;  
 import com.example.demo.dtos.StatusDTO;
 import com.example.demo.models.ImovelModel;
 import com.example.demo.services.EmailService;
@@ -28,6 +28,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+
+import java.math.BigDecimal;
+
+import org.springframework.web.bind.annotation.RequestParam;
+
+import com.example.demo.dtos.ImovelResumoDTO;
+import com.example.demo.dtos.PaginaDTO;
 
 
 @RestController
@@ -56,6 +63,20 @@ public class ImovelController {
     public ResponseEntity<List<ImovelModel>> getAll() {
         List<ImovelModel> list = service.getAll();
         return ResponseEntity.status(HttpStatus.OK).body(list);
+    }
+
+    // vitrine pública: filtros, ordenação por preço e paginação
+    @GetMapping("/vitrine")
+    public ResponseEntity<PaginaDTO<ImovelResumoDTO>> vitrine(
+            @RequestParam(required = false) Integer bairroId,
+            @RequestParam(required = false) String finalidade,
+            @RequestParam(required = false) BigDecimal precoMin,
+            @RequestParam(required = false) BigDecimal precoMax,
+            @RequestParam(defaultValue = "recentes") String ordem,
+            @RequestParam(defaultValue = "0") int pagina,
+            @RequestParam(defaultValue = "9") int tamanho) {
+        return ResponseEntity.ok(
+            service.vitrine(bairroId, finalidade, precoMin, precoMax, ordem, pagina, tamanho));
     }
 
     @GetMapping(value = "/{id}")

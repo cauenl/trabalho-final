@@ -2,6 +2,14 @@ package com.example.demo.controllers;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.Duration;
+
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.CacheControl;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -81,6 +89,26 @@ public class FotoImovelController {
             return ResponseEntity.ok(service.definirCapa(id));
         } catch (NoSuchElementException e) {
             return ResponseEntity.notFound().build();
+        }
+    }
+
+    // devolve a imagem em si (público, para usar em <img src="...">)
+    @GetMapping("/{id}/arquivo")
+    public ResponseEntity<Resource> arquivo(@PathVariable Integer id) {
+        try {
+            Path caminho = service.caminhoDoArquivo(id);
+            if (!Files.isReadable(caminho)) {
+                return ResponseEntity.notFound().build();
+            }
+            String tipo = Files.probeContentType(caminho);
+            return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(tipo != null ? tipo : "application/octet-stream"))
+                .cacheControl(CacheControl.maxAge(Duration.ofHours(1)))
+                .body(new FileSystemResource(caminho));
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.notFound().build();
+        } catch (IOException e) {
+            return ResponseEntity.internalServerError().build();
         }
     }
 

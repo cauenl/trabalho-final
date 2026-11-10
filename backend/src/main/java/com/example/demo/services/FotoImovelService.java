@@ -173,6 +173,21 @@ public class FotoImovelService {
         }
     }
 
+    // foto de capa do imóvel (a marcada como capa, ou a primeira)
+    public Integer capaDoImovel(Integer imovelId) {
+        List<FotoImovelModel> fotos = listarPorImovel(imovelId);
+        return fotos.stream()
+            .filter(f -> Boolean.TRUE.equals(f.getCapa()))
+            .findFirst()
+            .or(() -> fotos.stream().findFirst())
+            .map(FotoImovelModel::getId)
+            .orElse(null);
+    }
+
+    public Path caminhoDoArquivo(Integer id) {
+        return arquivoDe(buscar(id));
+    }
+
     // só uma foto por imóvel pode ser a capa
     @Transactional
     public FotoImovelModel definirCapa(Integer id) {
