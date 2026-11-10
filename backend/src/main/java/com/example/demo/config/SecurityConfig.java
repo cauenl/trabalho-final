@@ -37,6 +37,8 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET,
                     "/imoveis/**", "/bairros/**", "/tipos-imoveis/**", "/fotos/**").permitAll()
                 .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
+                // pagina de erro do Spring: sem isso um 400/404 numa rota publica vira 401
+                .requestMatchers("/error").permitAll()
                 // alterar o status de um imovel: qualquer usuario autenticado (ADMIN ou USER)
                 .requestMatchers(HttpMethod.PATCH, "/imoveis/*/status").authenticated()
                 // o que sobrou dessas rotas (escrita, usuarios, e-mail de teste): so ADMIN
@@ -65,10 +67,10 @@ return source;
 }
 
 
-    // transforma o claim "role" do token (ex.: ADMIN) na autoridade ROLE_ADMIN
+    // transforma o claim "tipo" do token (ex.: ADMIN) na autoridade ROLE_ADMIN
     private JwtAuthenticationConverter conversor() {
         JwtGrantedAuthoritiesConverter autoridades = new JwtGrantedAuthoritiesConverter();
-        autoridades.setAuthoritiesClaimName("role");
+        autoridades.setAuthoritiesClaimName("tipo");
         autoridades.setAuthorityPrefix("ROLE_");
 
         JwtAuthenticationConverter conversor = new JwtAuthenticationConverter();

@@ -87,10 +87,9 @@ public class AuthController {
         }
 
         return ResponseEntity.ok(new TokenDTO(
-            tokenService.gerar(user),
-            "Bearer",
-            TokenService.papel(user),
-            tokenService.segundosDeValidade()));
+    tokenService.gerar(user),
+    TokenService.papel(user),
+    tokenService.segundosDeValidade()));
     }
 
     // devolve quem e o dono do token (util para conferir o login)
@@ -99,7 +98,7 @@ public class AuthController {
         return ResponseEntity.ok(Map.of(
             "email", jwt.getSubject(),
             "id", jwt.getClaim("id"),
-            "role", jwt.getClaimAsString("role"),
+            "tipo", jwt.getClaimAsString("tipo"),
             "expiraEm", jwt.getExpiresAt().toString()));
     }
 

@@ -43,7 +43,7 @@ public class TokenService {
             .expiresAt(agora.plus(minutos, ChronoUnit.MINUTES))
             .subject(user.getEmail())
             .claim("id", user.getId())
-            .claim("role", papel(user))
+            .claim("tipo", papel(user))
             .build();
 
         JwsHeader header = JwsHeader.with(MacAlgorithm.HS256).build();
