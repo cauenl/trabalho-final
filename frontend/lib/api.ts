@@ -93,5 +93,10 @@ export async function apiFetch<T>(caminho: string, opcoes: Opcoes = {}): Promise
   }
 
   const texto = await resposta.text();
-  return (texto ? JSON.parse(texto) : undefined) as T;
+  if (!texto) {
+    return undefined as T;
+  }
+  // algumas rotas respondem com texto puro (ex.: "Mensagem enviada..."): só lê como JSON se for JSON
+  const tipo = resposta.headers.get("content-type") ?? "";
+  return (tipo.includes("json") ? JSON.parse(texto) : texto) as T;
 }

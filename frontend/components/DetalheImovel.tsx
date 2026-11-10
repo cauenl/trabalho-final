@@ -3,33 +3,11 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
+import FormContato from "@/components/FormContato";
 import { ApiError } from "@/lib/api";
 import { formatarMoeda } from "@/lib/formatar";
 import { buscarImovel, listarFotos, urlFoto } from "@/services/imoveis";
 import type { Foto, Imovel } from "@/types/imovel";
-
-const EMAIL_IMOBILIARIA = process.env.NEXT_PUBLIC_EMAIL_IMOBILIARIA ?? "contato@imobiliaria.com";
-
-// e-mail para a imobiliária com assunto e corpo já preenchidos
-function montarMailto(i: Imovel): string {
-  const valores = [
-    i.precoVenda != null ? `Venda: ${formatarMoeda(i.precoVenda)}` : null,
-    i.precoAluguel != null ? `Aluguel: ${formatarMoeda(i.precoAluguel)}` : null,
-  ]
-    .filter(Boolean)
-    .join(" | ");
-
-  const tipo = i.tipoImovel?.nome ?? "Imóvel";
-  const bairro = i.bairro?.nome ?? "-";
-
-  const assunto = `Interesse no imóvel ${i.id} - ${tipo} em ${bairro}`;
-  const corpo =
-    `Olá! Tenho interesse neste imóvel:\n\n` +
-    `Código: ${i.id}\nTipo: ${tipo}\nBairro: ${bairro}\nValor: ${valores || "a consultar"}\n\n` +
-    `Aguardo contato.`;
-
-  return `mailto:${EMAIL_IMOBILIARIA}?subject=${encodeURIComponent(assunto)}&body=${encodeURIComponent(corpo)}`;
-}
 
 interface Dados {
   imovel?: Imovel;
@@ -40,6 +18,7 @@ interface Dados {
 export default function DetalheImovel({ id }: { id: number }) {
   const [dados, setDados] = useState<Dados | null>(null);
   const [indice, setIndice] = useState(0);
+  const [contatoAberto, setContatoAberto] = useState(false);
 
   useEffect(() => {
     let cancelado = false;
@@ -153,12 +132,16 @@ export default function DetalheImovel({ id }: { id: number }) {
         </p>
       )}
 
-      <a
-        href={montarMailto(i)}
-        className="mt-6 inline-block rounded bg-blue-700 px-5 py-2.5 font-medium text-white"
-      >
-        Entrar em contato
-      </a>
+      {contatoAberto ? (
+        <FormContato imovelId={i.id} />
+      ) : (
+        <button
+          onClick={() => setContatoAberto(true)}
+          className="mt-6 inline-block rounded bg-blue-700 px-5 py-2.5 font-medium text-white"
+        >
+          Entrar em contato
+        </button>
+      )}
     </main>
   );
 }

@@ -42,3 +42,19 @@ export function listarFotos(imovelId: number): Promise<Foto[]> {
 export function urlFoto(fotoId: number): string {
   return `${API_URL}/fotos/${fotoId}/arquivo`;
 }
+
+export interface DadosContato {
+  nome: string;
+  email: string;
+  telefone: string;
+  mensagem: string;
+}
+
+// envia um e-mail (pelo Mailgun, via backend) para a imobiliária sobre o imóvel
+export function enviarContato(imovelId: number, dados: DadosContato): Promise<void> {
+  return apiFetch<void>(`/imoveis/${imovelId}/contato`, {
+    method: "POST",
+    body: dados,
+    token: null, // rota pública
+  });
+}
