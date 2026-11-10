@@ -93,15 +93,32 @@ traz as claims `sub` (e-mail), `tipo` e `exp`.
 
 `GET /fotos/{id}/arquivo` serve a imagem de uma foto.
 
+### Contato sobre um imóvel (e-mail pelo Mailgun)
+
+`POST /imoveis/{id}/contato` (público) com `{ "nome", "email", "telefone", "mensagem" }` envia um e-mail
+**para a imobiliária** com o código, o tipo, o bairro e o valor do imóvel e os dados do visitante;
+"Responder" no e-mail vai para o visitante (Reply-To).
+
+Configuração em `application-local.properties` (ou variáveis de ambiente):
+
+| Propriedade | Para que serve |
+|---|---|
+| `spring.mail.username` / `spring.mail.password` | conta SMTP do Mailgun |
+| `app.imobiliaria.email` | e-mail que **recebe** os contatos |
+
+> No sandbox do Mailgun, o destinatário precisa estar em **Authorized Recipients** (e confirmado pelo
+> link que o Mailgun envia). Sem isso o envio é recusado e a tela mostra um erro amigável.
+> Sem `app.imobiliaria.email`, o endpoint responde **503**.
+
 ## Telas do front-end
 
 | Rota | Quem acessa |
 |---|---|
-| `/` vitrine com filtros, ordenação e paginação | Todos |
-| `/imoveis/{id}` detalhe, galeria e botão "Entrar em contato" | Todos |
+| `/` vitrine com filtros laterais, ordenação e paginação | Todos (inclusive o admin) |
+| `/imoveis/{id}` detalhe, galeria e formulário "Entrar em contato" | Todos (inclusive o admin) |
 | `/login` | Todos |
-| `/cliente` | USER |
-| `/admin` | ADMIN |
+| `/cliente` (área do cliente) | **só USER**: o admin é levado ao painel |
+| `/admin` (painel) | **só ADMIN**: o cliente é levado à própria área |
 
 Sem sessão, as telas protegidas levam ao login; perfil errado volta para a área do próprio perfil;
 um 401 apaga o token e desloga. O menu muda conforme o perfil e o botão "Sair" apaga o token.
