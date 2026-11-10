@@ -48,33 +48,40 @@ export default function Home() {
     <main className="mx-auto max-w-6xl px-4 py-8">
       <h1 className="mb-6 text-2xl font-bold text-gray-900">Imóveis disponíveis</h1>
 
-      <FiltrosVitrine valor={filtros} onAplicar={setFiltros} />
+      {/* filtros em coluna lateral (fixa ao rolar); em telas pequenas ficam acima da lista */}
+      <div className="grid gap-6 lg:grid-cols-[17rem_1fr] lg:items-start">
+        <aside className="lg:sticky lg:top-4">
+          <FiltrosVitrine valor={filtros} onAplicar={setFiltros} />
+        </aside>
 
-      {carregando && <p className="text-gray-600">Carregando imóveis...</p>}
+        <section>
+          {carregando && <p className="text-gray-600">Carregando imóveis...</p>}
 
-      {erro && <p className="rounded border border-red-200 bg-red-50 p-4 text-red-700">{erro}</p>}
+          {erro && <p className="rounded border border-red-200 bg-red-50 p-4 text-red-700">{erro}</p>}
 
-      {dados && dados.conteudo.length === 0 && (
-        <p className="text-gray-600">Nenhum imóvel encontrado com esses filtros.</p>
-      )}
+          {dados && dados.conteudo.length === 0 && (
+            <p className="text-gray-600">Nenhum imóvel encontrado com esses filtros.</p>
+          )}
 
-      {dados && dados.conteudo.length > 0 && (
-        <>
-          <p className="mb-3 text-sm text-gray-500">
-            {dados.totalElementos} imóvel(is) · página {dados.pagina + 1} de {dados.totalPaginas}
-          </p>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {dados.conteudo.map((imovel) => (
-              <ImovelCard key={imovel.id} imovel={imovel} />
-            ))}
-          </div>
-          <Paginacao
-            pagina={dados.pagina}
-            totalPaginas={dados.totalPaginas}
-            onMudar={(p) => setFiltros((f) => ({ ...f, pagina: p }))}
-          />
-        </>
-      )}
+          {dados && dados.conteudo.length > 0 && (
+            <>
+              <p className="mb-3 text-sm text-gray-500">
+                {dados.totalElementos} imóvel(is) · página {dados.pagina + 1} de {dados.totalPaginas}
+              </p>
+              <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+                {dados.conteudo.map((imovel) => (
+                  <ImovelCard key={imovel.id} imovel={imovel} />
+                ))}
+              </div>
+              <Paginacao
+                pagina={dados.pagina}
+                totalPaginas={dados.totalPaginas}
+                onMudar={(p) => setFiltros((f) => ({ ...f, pagina: p }))}
+              />
+            </>
+          )}
+        </section>
+      </div>
     </main>
   );
 }
