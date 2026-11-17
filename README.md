@@ -143,10 +143,16 @@ aprova (o cliente recebe o PDF por e-mail) → cliente assina.
 | `GET/POST/DELETE /favoritos` | USER |
 | `GET /painel/resumo` (totais e dados dos gráficos) | CORRETOR, ADMIN |
 
-**Regras de negócio** (erro **409** com mensagem em texto): só imóvel *Disponível* recebe oferta; uma
-oferta pendente por cliente/imóvel; o tipo da oferta precisa ter preço no imóvel; aceitar reserva o
-imóvel e põe as outras ofertas pendentes **em espera**; assinar marca o imóvel *Vendido/Alugado* e recusa
-as demais; cancelar o contrato libera o imóvel. Um admin não exclui nem rebaixa a si mesmo.
+**Regras de negócio** (erro **409** com mensagem em texto):
+
+- Só imóvel *Disponível* recebe ofertas; reservado, alugado ou vendido **não mostra** o formulário "Fazer oferta".
+- Um cliente não tem duas ofertas pendentes para o mesmo imóvel, mas o imóvel pode ter ofertas de vários clientes.
+- O tipo da oferta (compra ou aluguel) precisa ter preço cadastrado no imóvel.
+- Ao **aceitar** uma oferta, o imóvel vira *Reservado* e as outras ofertas pendentes ficam **em espera**.
+- Ao **assinar** o contrato, o imóvel vira *Vendido* (compra) ou *Alugado* (aluguel) e as demais ofertas são recusadas.
+- Se o cliente desistir, o **admin cancela** o contrato (aguardando aprovação ou assinatura): o imóvel volta a
+  *Disponível*, a oferta aceita é cancelada e as ofertas em espera voltam a pendentes. Contrato assinado não cancela.
+- Um admin não exclui nem rebaixa a si mesmo.
 
 Telas: `/cliente` (resumo, ofertas, favoritos, contratos com assinatura), `/corretor` (ofertas e contratos),
 `/admin` (painel com gráficos, CRUD de imóveis, fotos, bairros, tipos e usuários, ofertas e contratos).

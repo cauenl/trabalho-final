@@ -32,13 +32,8 @@ export default function FormOferta({ imovelId, precoVenda, precoAluguel, disponi
 
   if (tipos.length === 0) return null;
 
-  if (!disponivel) {
-    return (
-      <p className="mt-6 rounded border border-yellow-200 bg-yellow-50 p-3 text-yellow-800">
-        Este imóvel não está disponível para ofertas no momento.
-      </p>
-    );
-  }
+  // reservado, alugado ou vendido: sem botão de oferta
+  if (!disponivel) return null;
 
   if (!sessao) {
     return (
@@ -76,7 +71,7 @@ export default function FormOferta({ imovelId, precoVenda, precoAluguel, disponi
 
   return (
     <form onSubmit={enviar} className="mt-6 space-y-3 rounded-lg border border-gray-200 bg-white p-4">
-      <h2 className="text-lg font-semibold text-gray-900">Fazer uma oferta</h2>
+      <h2 className="text-lg font-semibold text-gray-900">Fazer oferta</h2>
       <Aviso mensagem={resultado} />
 
       {tipos.length > 1 && (

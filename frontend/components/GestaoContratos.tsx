@@ -20,7 +20,7 @@ type Acao = "aprovar" | "recusar" | "cancelar";
 const TEXTOS: Record<Acao, { titulo: string; botao: string; perigo: boolean; detalhe: string }> = {
   aprovar: { titulo: "Aprovar contrato", botao: "Aprovar", perigo: false, detalhe: "Ele será enviado ao cliente (PDF por e-mail) para assinatura." },
   recusar: { titulo: "Recusar rascunho", botao: "Recusar", perigo: true, detalhe: "O corretor poderá preparar outro contrato." },
-  cancelar: { titulo: "Cancelar contrato", botao: "Cancelar contrato", perigo: true, detalhe: "O imóvel volta a ficar disponível." },
+  cancelar: { titulo: "Cancelar contrato", botao: "Cancelar contrato", perigo: true, detalhe: "Use quando o cliente desistir: a oferta aceita é cancelada, o imóvel volta a ficar disponível e as ofertas em espera voltam a pendentes." },
 };
 
 // Contratos para equipe: corretor acompanha; só o administrador aprova, recusa ou cancela.
@@ -116,7 +116,7 @@ export default function GestaoContratos() {
                         </button>
                       </>
                     )}
-                    {admin && c.status === "AGUARDANDO_ASSINATURA" && (
+                    {admin && (c.status === "AGUARDANDO_APROVACAO" || c.status === "AGUARDANDO_ASSINATURA") && (
                       <button onClick={() => setAlvo({ contrato: c, acao: "cancelar" })} className="text-red-700 hover:underline">
                         Cancelar
                       </button>

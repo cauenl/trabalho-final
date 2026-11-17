@@ -142,7 +142,7 @@ export default function DetalheImovel({ id }: { id: number }) {
         imovelId={i.id}
         precoVenda={i.precoVenda}
         precoAluguel={i.precoAluguel}
-        disponivel={!i.status || i.status.toLowerCase().startsWith("dispon")}
+        disponivel={i.status?.toLowerCase().startsWith("dispon") === true}
       />
 
       {contatoAberto ? (
