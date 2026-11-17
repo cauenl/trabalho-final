@@ -2,11 +2,13 @@
 
 import { useState } from "react";
 
+import Paginacao from "@/components/Paginacao";
 import Aviso, { type MensagemTela } from "@/components/ui/Aviso";
 import Confirmacao from "@/components/ui/Confirmacao";
 import Estado from "@/components/ui/Estado";
 import StatusBadge from "@/components/ui/StatusBadge";
 import { useDados } from "@/hooks/useDados";
+import { usePagina } from "@/hooks/usePagina";
 import { ApiError } from "@/lib/api";
 import { formatarData, formatarMoeda, ROTULO_TIPO_OFERTA } from "@/lib/formatar";
 import { prepararContrato } from "@/services/contratos";
@@ -34,6 +36,7 @@ const FILTROS = [
 export default function GestaoOfertas() {
   const [status, setStatus] = useState("");
   const { dados, carregando, erro, recarregar } = useDados(() => listarOfertas(status), status);
+  const pag = usePagina(dados, status);
   const [alvo, setAlvo] = useState<{ oferta: Oferta; acao: Acao } | null>(null);
   const [ocupado, setOcupado] = useState(false);
   const [mensagem, setMensagem] = useState<MensagemTela | null>(null);
@@ -88,7 +91,7 @@ export default function GestaoOfertas() {
               </tr>
             </thead>
             <tbody>
-              {dados?.map((o) => (
+              {pag.itensDaPagina?.map((o) => (
                 <tr key={o.id} className="border-t border-gray-100 align-top">
                   <td className="p-3">
                     {o.imovelTitulo}
@@ -128,6 +131,8 @@ export default function GestaoOfertas() {
             </tbody>
           </table>
         </div>
+        <Paginacao pagina={pag.pagina} totalPaginas={pag.totalPaginas} onMudar={pag.mudar} />
+        <p className="mt-2 text-center text-xs text-gray-500">{pag.total} oferta(s)</p>
       </Estado>
 
       <Confirmacao

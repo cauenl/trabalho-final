@@ -2,11 +2,13 @@
 
 import { useState } from "react";
 
+import Paginacao from "@/components/Paginacao";
 import Aviso, { type MensagemTela } from "@/components/ui/Aviso";
 import Confirmacao from "@/components/ui/Confirmacao";
 import Estado from "@/components/ui/Estado";
 import StatusBadge from "@/components/ui/StatusBadge";
 import { useDados } from "@/hooks/useDados";
+import { usePagina } from "@/hooks/usePagina";
 import { useSessao } from "@/hooks/useSessao";
 import { ApiError } from "@/lib/api";
 import { formatarData, formatarMoeda, ROTULO_TIPO_OFERTA } from "@/lib/formatar";
@@ -26,6 +28,7 @@ export default function GestaoContratos() {
   const { sessao } = useSessao();
   const admin = sessao?.tipo === "ADMIN";
   const { dados, carregando, erro, recarregar } = useDados(listarContratos);
+  const pag = usePagina(dados);
   const [alvo, setAlvo] = useState<{ contrato: Contrato; acao: Acao } | null>(null);
   const [ocupado, setOcupado] = useState(false);
   const [mensagem, setMensagem] = useState<MensagemTela | null>(null);
@@ -84,7 +87,7 @@ export default function GestaoContratos() {
               </tr>
             </thead>
             <tbody>
-              {dados?.map((c) => (
+              {pag.itensDaPagina?.map((c) => (
                 <tr key={c.id} className="border-t border-gray-100 align-top">
                   <td className="p-3">{c.id}</td>
                   <td className="p-3">{c.imovelTitulo}</td>
@@ -124,6 +127,8 @@ export default function GestaoContratos() {
             </tbody>
           </table>
         </div>
+        <Paginacao pagina={pag.pagina} totalPaginas={pag.totalPaginas} onMudar={pag.mudar} />
+        <p className="mt-2 text-center text-xs text-gray-500">{pag.total} contrato(s)</p>
       </Estado>
 
       <Confirmacao

@@ -2,10 +2,12 @@
 
 import { useState, type FormEvent, type ReactNode } from "react";
 
+import Paginacao from "@/components/Paginacao";
 import Aviso, { type MensagemTela } from "@/components/ui/Aviso";
 import Confirmacao from "@/components/ui/Confirmacao";
 import Estado from "@/components/ui/Estado";
 import { useDados } from "@/hooks/useDados";
+import { usePagina } from "@/hooks/usePagina";
 import { ApiError } from "@/lib/api";
 
 export interface Campo {
@@ -44,6 +46,7 @@ interface Props<T extends { id: number }> {
 // Tela de cadastro reutilizada pelos recursos do administrador (listar, criar, editar, excluir com confirmação).
 export default function CadastroAdmin<T extends { id: number }>(p: Props<T>) {
   const { dados, carregando, erro, recarregar } = useDados(p.listar, p.chaveLista);
+  const pag = usePagina(dados, p.chaveLista ?? "");
   const vazio: Form = p.formInicial ?? {};
   const [form, setForm] = useState<Form | null>(null); // null = formulário fechado
   const [editando, setEditando] = useState<number | null>(null);
@@ -191,7 +194,7 @@ export default function CadastroAdmin<T extends { id: number }>(p: Props<T>) {
               </tr>
             </thead>
             <tbody>
-              {dados?.map((item) => (
+              {pag.itensDaPagina?.map((item) => (
                 <tr key={item.id} className="border-t border-gray-100">
                   <td className="p-3">{item.id}</td>
                   {p.colunas.map((c) => (
@@ -214,6 +217,8 @@ export default function CadastroAdmin<T extends { id: number }>(p: Props<T>) {
             </tbody>
           </table>
         </div>
+        <Paginacao pagina={pag.pagina} totalPaginas={pag.totalPaginas} onMudar={pag.mudar} />
+        <p className="mt-2 text-center text-xs text-gray-500">{pag.total} registro(s)</p>
       </Estado>
 
       <Confirmacao

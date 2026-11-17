@@ -160,3 +160,15 @@ excluir, cancelar, recusar, aprovar ou assinar.
 - [x] **Aula 2: vitrine e área do cliente.** Vitrine, detalhe, contato, paginação, filtros e ordenação;
   login com validação, JWT nas requisições, rotas protegidas por perfil, logout e menu por perfil.
 - [x] **Aula 3: perfis, ofertas, favoritos, contratos (envio, aprovação e assinatura) e painéis com gráficos.**
+
+## Dados para demonstrar a paginação
+
+As tabelas do painel do admin (imóveis, bairros, usuários, ofertas e contratos) paginam de 10 em 10.
+Para ter registros suficientes, com o backend já executado uma vez:
+
+```bash
+mysql -u root --default-character-set=utf8mb4 restaurante < backend/database/dados-paginacao.sql
+```
+
+Cria 18 imóveis, 12 clientes (`cliente01@demo.com` a `cliente12@demo.com`, senha `Teste12345`),
+9 bairros, 24 ofertas e 12 contratos em várias situações. Pode ser rodado de novo sem duplicar.
