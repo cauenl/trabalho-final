@@ -45,12 +45,13 @@ public class ContratoService {
     private final UserRepository usuarios;
     private final ContratoPdf pdf;
     private final EmailService emailService;
+    private final NotificacaoService notificacao;
     private final String uploadDir;
     private final String nomeImobiliaria;
     private final String frontUrl;
 
     public ContratoService(ContratoRepository contratos, OfertaRepository ofertas, UserRepository usuarios,
-                           ContratoPdf pdf, EmailService emailService,
+                           ContratoPdf pdf, EmailService emailService, NotificacaoService notificacao,
                            @Value("${app.upload-dir}") String uploadDir,
                            @Value("${app.imobiliaria.nome}") String nomeImobiliaria,
                            @Value("${app.front-url:http://localhost:3000}") String frontUrl) {
@@ -59,6 +60,7 @@ public class ContratoService {
         this.usuarios = usuarios;
         this.pdf = pdf;
         this.emailService = emailService;
+        this.notificacao = notificacao;
         this.uploadDir = uploadDir;
         this.nomeImobiliaria = nomeImobiliaria;
         this.frontUrl = frontUrl;
@@ -90,6 +92,11 @@ public class ContratoService {
             throw new UncheckedIOException("Falha ao gerar o PDF do contrato", e);
         }
         contrato.setCaminhoPdf(destino.toString());
+        notificacao.avisarImobiliaria("Contrato " + contrato.getId() + " aguardando aprovação",
+            "Contrato aguardando aprovação",
+            "O contrato nº " + contrato.getId() + " do imóvel \"" + oferta.getImovel().getTitulo() + "\" (cliente "
+                + oferta.getUsuario().getNome() + ") foi preparado e espera a aprovação do administrador.",
+            "/admin/contratos", "Revisar contratos");
         return paraDTO(contrato);
     }
 
@@ -115,6 +122,13 @@ public class ContratoService {
             throw new RegraNegocioException("Só contratos aguardando aprovação podem ser recusados.");
         }
         contrato.setStatus(StatusContrato.CANCELADO);
+        if (contrato.getPreparadoPor() != null) {
+            notificacao.avisar(contrato.getPreparadoPor().getEmail(), contrato.getPreparadoPor().getNome(),
+                "Contrato " + contrato.getId() + " recusado", "Contrato recusado pelo administrador",
+                "O rascunho do contrato nº " + contrato.getId() + " (\"" + contrato.getOferta().getImovel().getTitulo()
+                    + "\") foi recusado. A oferta continua aceita: você pode preparar outro contrato.",
+                "/corretor", "Abrir ofertas");
+        }
         return paraDTO(contrato);
     }
 
@@ -141,7 +155,16 @@ public class ContratoService {
         }
         for (OfertaModel outra : ofertas.findByImovelIdAndStatusIn(imovel.getId(), List.of(StatusOferta.EM_ESPERA))) {
             outra.setStatus(StatusOferta.PENDENTE);
+            notificacao.avisar(outra.getUsuario().getEmail(), outra.getUsuario().getNome(),
+                "O imóvel voltou a ficar disponível", "Sua oferta voltou a ser analisada",
+                "A reserva do imóvel \"" + imovel.getTitulo() + "\" foi cancelada. A sua oferta voltou a ficar pendente.",
+                "/cliente/ofertas", "Ver minhas ofertas");
         }
+        notificacao.avisar(oferta.getUsuario().getEmail(), oferta.getUsuario().getNome(),
+            "Contrato " + contrato.getId() + " cancelado", "Contrato cancelado",
+            "O contrato nº " + contrato.getId() + " do imóvel \"" + imovel.getTitulo()
+                + "\" foi cancelado e o imóvel voltou a ficar disponível.",
+            "/cliente/contratos", "Ver meus contratos");
         return paraDTO(contrato);
     }
 
@@ -166,7 +189,20 @@ public class ContratoService {
         for (OfertaModel outra : ofertas.findByImovelIdAndStatusIn(imovel.getId(),
                 List.of(StatusOferta.PENDENTE, StatusOferta.EM_ESPERA))) {
             outra.setStatus(StatusOferta.RECUSADA);
+            notificacao.avisar(outra.getUsuario().getEmail(), outra.getUsuario().getNome(),
+                "Sua oferta foi recusada", "Imóvel indisponível",
+                "O imóvel \"" + imovel.getTitulo() + "\" foi " + (oferta.getTipo() == TipoOferta.VENDA ? "vendido" : "alugado")
+                    + " para outro cliente, então a sua oferta foi recusada.",
+                "/", "Ver outros imóveis");
         }
+        notificacao.avisar(oferta.getUsuario().getEmail(), oferta.getUsuario().getNome(),
+            "Contrato " + contrato.getId() + " assinado", "Contrato assinado!",
+            "Você assinou o contrato nº " + contrato.getId() + " do imóvel \"" + imovel.getTitulo() + "\". Parabéns!",
+            "/cliente/contratos", "Ver meus contratos");
+        notificacao.avisarImobiliaria("Contrato " + contrato.getId() + " assinado", "Contrato assinado",
+            oferta.getUsuario().getNome() + " assinou o contrato nº " + contrato.getId() + " do imóvel \""
+                + imovel.getTitulo() + "\", que agora consta como " + imovel.getStatus() + ".",
+            "/admin/contratos", "Ver contratos");
         return paraDTO(contrato);
     }
 

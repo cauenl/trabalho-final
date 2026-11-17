@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body style="font-family: Arial, sans-serif; background:#f4f4f4; padding:20px; color:#2c3e50;">
+    <div style="max-width:600px; margin:auto; background:#ffffff; padding:24px; border-radius:6px;">
+
+        <h2 style="margin-top:0;" th:text="${titulo}">Título</h2>
+
+        <p>Olá, <span th:text="${nome}">Nome</span>!</p>
+
+        <p th:text="${mensagem}" style="line-height:1.5;">Mensagem</p>
+
+        <p th:if="${link != null}">
+            <a th:href="${link}" th:text="${textoLink}" style="display:inline-block; background:#1d4ed8; color:#ffffff; padding:10px 18px; border-radius:4px; text-decoration:none;">
+                Abrir no sistema
+            </a>
+        </p>
+
+        <p style="margin-bottom:0;">Atenciosamente,<br>
+            <strong th:text="${nomeImobiliaria}">Imobiliária</strong>
+        </p>
+    </div>
+</body>
+</html>

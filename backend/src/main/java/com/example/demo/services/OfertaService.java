@@ -32,9 +32,12 @@ public class OfertaService {
     private final ImovelRepository imoveis;
     private final UserRepository usuarios;
     private final ContratoRepository contratos;
+    private final NotificacaoService notificacao;
 
     public OfertaService(OfertaRepository ofertas, ImovelRepository imoveis,
-                         UserRepository usuarios, ContratoRepository contratos) {
+                         UserRepository usuarios, ContratoRepository contratos,
+                         NotificacaoService notificacao) {
+        this.notificacao = notificacao;
         this.ofertas = ofertas;
         this.imoveis = imoveis;
         this.usuarios = usuarios;
@@ -82,7 +85,17 @@ public class OfertaService {
         oferta.setValorProposto(req.valor());
         oferta.setMensagem(req.mensagem() == null ? null : req.mensagem().trim());
         oferta.setStatus(StatusOferta.PENDENTE);
-        return paraDTO(ofertas.save(oferta));
+        oferta = ofertas.save(oferta);
+
+        notificacao.avisar(usuario.getEmail(), usuario.getNome(), "Recebemos a sua oferta",
+            "Oferta recebida",
+            "Recebemos a sua oferta de " + dinheiro(oferta) + " para o imóvel \"" + imovel.getTitulo()
+                + "\". Você será avisado a cada mudança de situação.",
+            "/cliente/ofertas", "Ver minhas ofertas");
+        notificacao.avisarImobiliaria("Nova oferta para " + imovel.getTitulo(), "Nova oferta recebida",
+            usuario.getNome() + " ofereceu " + dinheiro(oferta) + " pelo imóvel \"" + imovel.getTitulo() + "\".",
+            "/admin/ofertas", "Ver ofertas");
+        return paraDTO(oferta);
     }
 
     @Transactional(readOnly = true)
@@ -109,6 +122,10 @@ public class OfertaService {
             throw new RegraNegocioException("Só ofertas pendentes ou em espera podem ser canceladas.");
         }
         oferta.setStatus(StatusOferta.CANCELADA);
+        notificacao.avisarImobiliaria("Oferta cancelada: " + oferta.getImovel().getTitulo(),
+            "Oferta cancelada pelo cliente",
+            oferta.getUsuario().getNome() + " cancelou a oferta de " + dinheiro(oferta) + " para \""
+                + oferta.getImovel().getTitulo() + "\".", "/admin/ofertas", "Ver ofertas");
         return paraDTO(oferta);
     }
 
@@ -131,8 +148,18 @@ public class OfertaService {
         for (OfertaModel outra : ofertas.findByImovelIdAndStatusIn(imovel.getId(), List.of(StatusOferta.PENDENTE))) {
             if (!outra.getId().equals(oferta.getId())) {
                 outra.setStatus(StatusOferta.EM_ESPERA);
+                notificacao.avisar(outra.getUsuario().getEmail(), outra.getUsuario().getNome(),
+                    "Sua oferta está em espera", "Oferta em espera",
+                    "O imóvel \"" + imovel.getTitulo() + "\" foi reservado para outra oferta. A sua ficou em espera e "
+                        + "volta a ser analisada se a reserva for cancelada.",
+                    "/cliente/ofertas", "Ver minhas ofertas");
             }
         }
+        notificacao.avisar(oferta.getUsuario().getEmail(), oferta.getUsuario().getNome(),
+            "Sua oferta foi aceita", "Oferta aceita!",
+            "A sua oferta de " + dinheiro(oferta) + " para o imóvel \"" + imovel.getTitulo()
+                + "\" foi aceita e o imóvel está reservado para você. Em breve enviaremos o contrato para assinatura.",
+            "/cliente/ofertas", "Ver minhas ofertas");
         return paraDTO(oferta);
     }
 
@@ -143,6 +170,11 @@ public class OfertaService {
             throw new RegraNegocioException("Só ofertas pendentes ou em espera podem ser recusadas.");
         }
         oferta.setStatus(StatusOferta.RECUSADA);
+        notificacao.avisar(oferta.getUsuario().getEmail(), oferta.getUsuario().getNome(),
+            "Sua oferta foi recusada", "Oferta recusada",
+            "A sua oferta de " + dinheiro(oferta) + " para o imóvel \"" + oferta.getImovel().getTitulo()
+                + "\" não foi aceita. Você pode fazer uma nova oferta em outros imóveis.",
+            "/", "Ver imóveis");
         return paraDTO(oferta);
     }
 
@@ -157,6 +189,10 @@ public class OfertaService {
             o.getTipo(), o.getValorProposto(), o.getMensagem(), o.getStatus(), o.getCriadoEm(),
             contrato == null ? null : contrato.getId(),
             contrato == null ? null : contrato.getStatus());
+    }
+
+    private String dinheiro(OfertaModel o) {
+        return java.text.NumberFormat.getCurrencyInstance(new java.util.Locale("pt", "BR")).format(o.getValorProposto());
     }
 
     private OfertaModel buscar(Integer id) {

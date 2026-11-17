@@ -178,3 +178,23 @@ mysql -u root --default-character-set=utf8mb4 restaurante < backend/database/dad
 
 Cria 18 imóveis, 12 clientes (`cliente01@demo.com` a `cliente12@demo.com`, senha `Teste12345`),
 9 bairros, 24 ofertas e 12 contratos em várias situações. Pode ser rodado de novo sem duplicar.
+
+## E-mails automáticos (Mailgun)
+
+Toda mudança de situação avisa por e-mail quem é afetado. O envio é feito em segundo plano, depois que a
+alteração foi gravada, e uma falha de e-mail nunca desfaz a ação (só aparece no log do backend).
+
+| Evento | Quem recebe |
+|---|---|
+| Oferta enviada | cliente (confirmação) e imobiliária |
+| Oferta aceita / recusada | cliente |
+| Oferta em espera (outra foi aceita) | clientes das outras ofertas |
+| Oferta cancelada pelo cliente | imobiliária |
+| Contrato preparado | imobiliária (para o admin aprovar) |
+| Contrato aprovado | cliente, com o PDF anexo |
+| Contrato recusado pelo admin | corretor que o preparou |
+| Contrato cancelado | cliente; ofertas em espera voltam a pendentes e seus clientes são avisados |
+| Contrato assinado | cliente e imobiliária; clientes das ofertas recusadas |
+
+No **sandbox** do Mailgun só chega e-mail para endereços em *Authorized Recipients*; para os demais o log mostra
+`E-mail NÃO enviado ... Authorized recipients`. Usuário e senha SMTP ficam só no `application-local.properties`.
