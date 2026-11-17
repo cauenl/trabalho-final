@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body style="font-family: Arial, sans-serif; background:#f4f4f4; padding:20px; color:#2c3e50;">
+    <div style="max-width:600px; margin:auto; background:#ffffff; padding:24px; border-radius:6px;">
+
+        <h2 style="margin-top:0;">
+            Olá, <span th:text="${nomeCliente}">Cliente</span>!
+        </h2>
+
+        <p>
+            O seu contrato de <b th:text="${tipo}">locação</b> do imóvel
+            <b th:text="${imovelTitulo}">Imóvel</b> foi aprovado e está <b>aguardando a sua assinatura</b>.
+        </p>
+
+        <table style="width:100%; border-collapse:collapse;">
+            <tr>
+                <td style="padding:4px 0; font-weight:bold; width:160px;">Contrato</td>
+                <td th:text="'Nº ' + ${numeroContrato}">Nº 1</td>
+            </tr>
+            <tr>
+                <td style="padding:4px 0; font-weight:bold;">Valor</td>
+                <td th:text="${valor}">R$ 0,00</td>
+            </tr>
+        </table>
+
+        <p>O PDF do contrato segue em anexo. Para assinar, entre no sistema:</p>
+
+        <p>
+            <a th:href="${link}" style="display:inline-block; background:#1d4ed8; color:#ffffff; padding:10px 18px; border-radius:4px; text-decoration:none;">
+                Ver e assinar o contrato
+            </a>
+        </p>
+
+        <p style="margin-bottom:0;">Atenciosamente,<br>
+            <strong th:text="${nomeImobiliaria}">Imobiliária</strong>
+        </p>
+    </div>
+</body>
+</html>

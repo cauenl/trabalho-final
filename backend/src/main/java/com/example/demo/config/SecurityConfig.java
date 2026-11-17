@@ -39,8 +39,27 @@ public class SecurityConfig {
                 .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
                 // pagina de erro do Spring: sem isso um 400/404 numa rota publica vira 401
                 .requestMatchers("/error").permitAll()
-                // alterar o status de um imovel: qualquer usuario autenticado (ADMIN ou USER)
+                // alterar o status de um imovel: qualquer usuario autenticado
                 .requestMatchers(HttpMethod.PATCH, "/imoveis/*/status").authenticated()
+                // CLIENTE (USER): favoritos, fazer/cancelar oferta, ver e assinar os seus contratos
+                .requestMatchers("/favoritos/**").hasRole("USER")
+                .requestMatchers(HttpMethod.POST, "/ofertas").hasRole("USER")
+                .requestMatchers(HttpMethod.GET, "/ofertas/minhas").hasRole("USER")
+                .requestMatchers(HttpMethod.PATCH, "/ofertas/*/cancelar").hasRole("USER")
+                .requestMatchers(HttpMethod.GET, "/contratos/meus").hasRole("USER")
+                .requestMatchers(HttpMethod.POST, "/contratos/*/assinar").hasRole("USER")
+                // o PDF: a regra de quem pode baixar (dono ou equipe) fica no servico
+                .requestMatchers(HttpMethod.GET, "/contratos/*/pdf").authenticated()
+                // EQUIPE (CORRETOR e ADMIN): ofertas, preparar contrato e painel
+                .requestMatchers(HttpMethod.GET, "/ofertas").hasAnyRole("CORRETOR", "ADMIN")
+                .requestMatchers(HttpMethod.PATCH, "/ofertas/*/aceitar", "/ofertas/*/recusar")
+                    .hasAnyRole("CORRETOR", "ADMIN")
+                .requestMatchers(HttpMethod.POST, "/contratos").hasAnyRole("CORRETOR", "ADMIN")
+                .requestMatchers(HttpMethod.GET, "/contratos").hasAnyRole("CORRETOR", "ADMIN")
+                .requestMatchers("/painel/**").hasAnyRole("CORRETOR", "ADMIN")
+                // so ADMIN: aprovar, recusar e cancelar contratos
+                .requestMatchers(HttpMethod.PATCH, "/contratos/*/aprovar", "/contratos/*/recusar",
+                    "/contratos/*/cancelar").hasRole("ADMIN")
                 // o que sobrou dessas rotas (escrita, usuarios, e-mail de teste): so ADMIN
                 .requestMatchers("/imoveis/**", "/bairros/**", "/tipos-imoveis/**",
                     "/fotos/**", "/users/**", "/email/**").hasRole("ADMIN")

@@ -1,8 +1,10 @@
 package com.example.demo.services;
 
+import java.nio.file.Path;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -30,12 +32,25 @@ public class EmailService {
     public void enviarEmailComTemplate(String para, String assunto,
                                   String template, Map<String, Object> variaveis)
             throws MessagingException {
-        enviarEmailComTemplate(para, null, assunto, template, variaveis);
+        enviar(para, null, assunto, template, variaveis, null, null);
     }
 
     // responderPara (opcional): quem recebe a resposta ao clicar em "Responder"
     public void enviarEmailComTemplate(String para, String responderPara, String assunto,
                                   String template, Map<String, Object> variaveis)
+            throws MessagingException {
+        enviar(para, responderPara, assunto, template, variaveis, null, null);
+    }
+
+    // e-mail com um arquivo anexo (ex.: o contrato em PDF)
+    public void enviarEmailComAnexo(String para, String assunto, String template,
+                                    Map<String, Object> variaveis, Path anexo, String nomeAnexo)
+            throws MessagingException {
+        enviar(para, null, assunto, template, variaveis, anexo, nomeAnexo);
+    }
+
+    private void enviar(String para, String responderPara, String assunto, String template,
+                        Map<String, Object> variaveis, Path anexo, String nomeAnexo)
             throws MessagingException {
 
         Context context = new Context();
@@ -52,6 +67,9 @@ public class EmailService {
         }
         helper.setSubject(assunto);
         helper.setText(html, true);
+        if (anexo != null) {
+            helper.addAttachment(nomeAnexo, new FileSystemResource(anexo.toFile()));
+        }
 
         mailSender.send(mime);
     }

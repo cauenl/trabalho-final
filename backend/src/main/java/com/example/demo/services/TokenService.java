@@ -29,9 +29,16 @@ public class TokenService {
         return minutos * 60;
     }
 
-    // "admin" no campo tipo do usuario vira ADMIN; qualquer outro valor vira USER
+    // o campo tipo do usuario: admin -> ADMIN, corretor -> CORRETOR; qualquer outro valor vira USER
     public static String papel(UserModel user) {
-        return "admin".equalsIgnoreCase(user.getTipo()) ? "ADMIN" : "USER";
+        String tipo = user.getTipo() == null ? "" : user.getTipo().trim();
+        if ("admin".equalsIgnoreCase(tipo)) {
+            return "ADMIN";
+        }
+        if ("corretor".equalsIgnoreCase(tipo)) {
+            return "CORRETOR";
+        }
+        return "USER";
     }
 
     public String gerar(UserModel user) {
