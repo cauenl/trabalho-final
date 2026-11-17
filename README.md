@@ -117,11 +117,41 @@ Configuração em `application-local.properties` (ou variáveis de ambiente):
 | `/` vitrine com filtros laterais, ordenação e paginação | Todos (inclusive o admin) |
 | `/imoveis/{id}` detalhe, galeria e formulário "Entrar em contato" | Todos (inclusive o admin) |
 | `/login` | Todos |
-| `/cliente` (área do cliente) | **só USER**: o admin é levado ao painel |
-| `/admin` (painel) | **só ADMIN**: o cliente é levado à própria área |
+| `/cliente/**` (área do cliente) | **só USER**: o admin é levado ao painel |
+| `/corretor/**` | **só CORRETOR** |
+| `/admin/**` (painel e cadastros) | **só ADMIN**: os outros perfis voltam à própria área |
 
 Sem sessão, as telas protegidas levam ao login; perfil errado volta para a área do próprio perfil;
 um 401 apaga o token e desloga. O menu muda conforme o perfil e o botão "Sair" apaga o token.
+
+## Aula 3: perfis, ofertas, contratos e painel
+
+Três perfis: **Cliente (`USER`)**, **Corretor (`CORRETOR`)** e **Administrador (`ADMIN`)**.
+O admin cria corretores e clientes em `/admin/usuarios` (ou altera o perfil de um usuário).
+
+**Fluxo do checkpoint:** cliente envia oferta → corretor aceita e prepara o contrato → administrador
+aprova (o cliente recebe o PDF por e-mail) → cliente assina.
+
+| Endpoint | Quem |
+|---|---|
+| `POST /ofertas`, `GET /ofertas/minhas`, `PATCH /ofertas/{id}/cancelar` | USER |
+| `GET /ofertas?status=`, `PATCH /ofertas/{id}/aceitar` e `/recusar` | CORRETOR, ADMIN |
+| `POST /contratos` (prepara o contrato a partir de uma oferta aceita), `GET /contratos` | CORRETOR, ADMIN |
+| `PATCH /contratos/{id}/aprovar`, `/recusar`, `/cancelar` | ADMIN |
+| `GET /contratos/meus`, `POST /contratos/{id}/assinar` | USER (só depois da aprovação) |
+| `GET /contratos/{id}/pdf` | dono do contrato ou equipe |
+| `GET/POST/DELETE /favoritos` | USER |
+| `GET /painel/resumo` (totais e dados dos gráficos) | CORRETOR, ADMIN |
+
+**Regras de negócio** (erro **409** com mensagem em texto): só imóvel *Disponível* recebe oferta; uma
+oferta pendente por cliente/imóvel; o tipo da oferta precisa ter preço no imóvel; aceitar reserva o
+imóvel e põe as outras ofertas pendentes **em espera**; assinar marca o imóvel *Vendido/Alugado* e recusa
+as demais; cancelar o contrato libera o imóvel. Um admin não exclui nem rebaixa a si mesmo.
+
+Telas: `/cliente` (resumo, ofertas, favoritos, contratos com assinatura), `/corretor` (ofertas e contratos),
+`/admin` (painel com gráficos, CRUD de imóveis, fotos, bairros, tipos e usuários, ofertas e contratos).
+Todas as telas têm estados de carregando, erro (com "tentar de novo") e vazio, e confirmação antes de
+excluir, cancelar, recusar, aprovar ou assinar.
 
 ## Andamento
 
@@ -129,6 +159,4 @@ um 401 apaga o token e desloga. O menu muda conforme o perfil e o botão "Sair" 
   projeto front-end criado e primeira chamada à API (listar imóveis) funcionando.
 - [x] **Aula 2: vitrine e área do cliente.** Vitrine, detalhe, contato, paginação, filtros e ordenação;
   login com validação, JWT nas requisições, rotas protegidas por perfil, logout e menu por perfil.
-- [ ] Tabelas `ofertas`, `contratos` e `favoritos` no backend
-- [ ] Ofertas, favoritos e contratos do cliente
-- [ ] CRUDs, gestão e painel do administrador
+- [x] **Aula 3: perfis, ofertas, favoritos, contratos (envio, aprovação e assinatura) e painéis com gráficos.**
