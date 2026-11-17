@@ -3,7 +3,9 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
+import FavoritoBotao from "@/components/FavoritoBotao";
 import FormContato from "@/components/FormContato";
+import FormOferta from "@/components/FormOferta";
 import { ApiError } from "@/lib/api";
 import { formatarMoeda } from "@/lib/formatar";
 import { buscarImovel, listarFotos, urlFoto } from "@/services/imoveis";
@@ -131,6 +133,17 @@ export default function DetalheImovel({ id }: { id: number }) {
           <b>Características:</b> {i.caracteristicas}
         </p>
       )}
+
+      <div className="mt-4">
+        <FavoritoBotao imovelId={i.id} comTexto />
+      </div>
+
+      <FormOferta
+        imovelId={i.id}
+        precoVenda={i.precoVenda}
+        precoAluguel={i.precoAluguel}
+        disponivel={!i.status || i.status.toLowerCase().startsWith("dispon")}
+      />
 
       {contatoAberto ? (
         <FormContato imovelId={i.id} />

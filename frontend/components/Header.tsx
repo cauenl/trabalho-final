@@ -4,7 +4,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { useSessao } from "@/hooks/useSessao";
-import { encerrarSessao } from "@/lib/auth";
+import { areaInicial, encerrarSessao, ROTULO_PERFIL } from "@/lib/auth";
+
+const ROTULO_AREA = { ADMIN: "Painel", CORRETOR: "Meu painel", USER: "Minha área" } as const;
 
 export default function Header() {
   const { sessao, pronto } = useSessao();
@@ -33,20 +35,18 @@ export default function Header() {
           </Link>
         )}
 
-        {pronto && sessao?.tipo === "USER" && (
-          <Link href="/cliente" className="text-gray-700 hover:underline">
-            Minha área
-          </Link>
-        )}
-        {pronto && sessao?.tipo === "ADMIN" && (
-          <Link href="/admin" className="text-gray-700 hover:underline">
-            Painel
-          </Link>
-        )}
-
+        {/* o menu mostra só as opções do perfil logado */}
         {pronto && sessao && (
           <>
-            <span className="text-gray-500">{sessao.email}</span>
+            <Link href={areaInicial(sessao.tipo)} className="font-medium text-blue-800 hover:underline">
+              {ROTULO_AREA[sessao.tipo]}
+            </Link>
+            <span className="text-gray-500">
+              {sessao.email}{" "}
+              <span className="rounded bg-gray-100 px-1.5 py-0.5 text-xs text-gray-600">
+                {ROTULO_PERFIL[sessao.tipo]}
+              </span>
+            </span>
             <button onClick={sair} className="rounded border border-gray-300 px-3 py-1.5">
               Sair
             </button>

@@ -30,7 +30,7 @@ function mensagemPorStatus(status: number, corpo: string): string {
     case 403:
       return "Acesso negado. Você não tem permissão para esta ação.";
     case 404:
-      return "Item não encontrado.";
+      return corpo || "Item não encontrado.";
     case 409:
       return corpo || "A operação não pôde ser concluída por causa de uma regra do sistema.";
     default:
@@ -46,7 +46,8 @@ type Opcoes = Omit<RequestInit, "body"> & {
   token?: string | null;
 };
 
-export async function apiFetch<T>(caminho: string, opcoes: Opcoes = {}): Promise<T> {
+// faz a chamada e já traduz os erros em ApiError com mensagem amigável
+async function requisitar(caminho: string, opcoes: Opcoes = {}): Promise<Response> {
   const { body, token, headers, ...resto } = opcoes;
   const tokenEnviado = token === undefined ? obterSessao()?.token : token;
 
@@ -81,12 +82,18 @@ export async function apiFetch<T>(caminho: string, opcoes: Opcoes = {}): Promise
       // se o token era o da sessão, refaz sem ele: rotas públicas (vitrine) continuam
       // funcionando e as protegidas devolvem 401 de novo, que o guard leva ao login
       if (token === undefined) {
-        return apiFetch<T>(caminho, { ...opcoes, token: null });
+        return requisitar(caminho, { ...opcoes, token: null });
       }
     }
     const corpo = await resposta.text().catch(() => "");
     throw new ApiError(resposta.status, mensagemPorStatus(resposta.status, textoSimples(corpo)));
   }
+
+  return resposta;
+}
+
+export async function apiFetch<T>(caminho: string, opcoes: Opcoes = {}): Promise<T> {
+  const resposta = await requisitar(caminho, opcoes);
 
   if (resposta.status === 204) {
     return undefined as T;
@@ -99,4 +106,10 @@ export async function apiFetch<T>(caminho: string, opcoes: Opcoes = {}): Promise
   // algumas rotas respondem com texto puro (ex.: "Mensagem enviada..."): só lê como JSON se for JSON
   const tipo = resposta.headers.get("content-type") ?? "";
   return (tipo.includes("json") ? JSON.parse(texto) : texto) as T;
+}
+
+// para arquivos (ex.: o PDF do contrato), que precisam do token no cabeçalho
+export async function apiBlob(caminho: string, opcoes: Opcoes = {}): Promise<Blob> {
+  const resposta = await requisitar(caminho, opcoes);
+  return resposta.blob();
 }
